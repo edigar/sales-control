@@ -1,0 +1,67 @@
+services:
+  app:
+    build: .
+    container_name: sales-control-api
+    ports:
+      - '80:80'
+    volumes:
+      - '.:/var/www/html'
+    networks:
+      - sales-control
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+  mysql:
+    image: 'mysql:9'
+    container_name: mysql
+    env_file:
+      - ./.env
+    environment:
+      - TZ=${TZ}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql:/var/lib/mysql
+    networks:
+      - sales-control
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=${DB_PASSWORD} mysqladmin ping -h localhost -u ${DB_USERNAME}"]
+      retries: 3
+      timeout: 5s
+  redis:
+    image: 'redis:alpine'
+    container_name: redis
+    env_file:
+      - ./.env
+    ports:
+      - '${REDIS_PORT:-6379}:6379'
+    volumes:
+      - 'redis:/data'
+    networks:
+      - sales-control
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      retries: 3
+      timeout: 5s
+  mailhog:
+    image: 'mailhog/mailhog:latest'
+    container_name: mailhog
+    ports:
+      - '${MAILHOG_SMTP_PORT:-1025}:1025'
+      - '${MAILHOG_HTTP_PORT:-8025}:8025'
+    networks:
+      - sales-control
+networks:
+  sales-control:
+    driver: bridge
+volumes:
+  mysql:
+    driver: local
+  redis:
+    driver: local
