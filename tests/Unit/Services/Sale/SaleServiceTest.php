@@ -40,8 +40,6 @@ class SaleServiceTest extends TestCase
         parent::tearDown();
     }
 
-    // ==================== Helper Methods ====================
-
     private function mockDbTransaction(): void
     {
         DB::shouldReceive('transaction')
