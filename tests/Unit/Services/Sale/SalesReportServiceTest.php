@@ -32,8 +32,6 @@ class SalesReportServiceTest extends TestCase
         parent::tearDown();
     }
 
-    // ==================== Helper Methods ====================
-
     private function mockDbTransaction(): void
     {
         DB::shouldReceive('transaction')
@@ -70,8 +68,6 @@ class SalesReportServiceTest extends TestCase
             'total_commission' => $totalCommission,
         ];
     }
-
-    // ==================== generateDailySalesReportBySeller Tests ====================
 
     public function test_generate_daily_sales_report_by_seller_successfully(): void
     {
@@ -113,7 +109,6 @@ class SalesReportServiceTest extends TestCase
     public function test_generate_daily_sales_report_by_seller_with_no_date_uses_current_date(): void
     {
         $currentDate = now()->toDateString();
-        
         $sellerData = collect([
             $this->createSellerSalesData(1, 'John Doe', 'john@example.com', 3, 750.00, 63.75),
         ]);
@@ -135,7 +130,6 @@ class SalesReportServiceTest extends TestCase
     public function test_generate_daily_sales_report_by_seller_returns_empty_collection_when_no_sales(): void
     {
         $date = '2025-10-26';
-        
         $this->mockDbTransaction();
         
         $this->repositoryMock
@@ -154,8 +148,6 @@ class SalesReportServiceTest extends TestCase
     public function test_generate_daily_sales_report_by_seller_converts_numeric_strings_to_proper_types(): void
     {
         $date = '2025-10-26';
-        
-        // Simula dados vindos do banco como strings
         $sellerData = collect([
             $this->createSellerSalesData(1, 'John Doe', 'john@example.com', '10', '2500.50', '212.54'),
         ]);
@@ -222,13 +214,10 @@ class SalesReportServiceTest extends TestCase
         $this->service->generateDailySalesReportBySeller($date);
     }
 
-    // ==================== generateDailySalesReport Tests ====================
-
     public function test_generate_daily_sales_report_successfully(): void
     {
         $date = '2025-10-26';
         
-        // O repositório retorna um objeto direto (não Collection)
         $salesData = $this->createDailySalesData(15, 5000.00, 425.00);
 
         $this->mockDbTransaction();
@@ -293,8 +282,6 @@ class SalesReportServiceTest extends TestCase
     public function test_generate_daily_sales_report_converts_numeric_strings_to_proper_types(): void
     {
         $date = '2025-10-26';
-        
-        // Simula dados vindos do banco como strings
         $salesData = (object) [
             'total_sales' => '25',
             'total_amount' => '10000.50',
@@ -374,8 +361,6 @@ class SalesReportServiceTest extends TestCase
 
         $this->assertEquals($date, $result->reportDate);
     }
-
-    // ==================== Integration Tests ====================
 
     public function test_both_methods_can_be_called_with_same_date(): void
     {
